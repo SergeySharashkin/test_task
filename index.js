@@ -1,23 +1,18 @@
 class UserService {
     //var здесь не нужны, свойства объвляются по именам
-    username;
-    //публичное свойство не обязательно объявлять перед конструктором
-    #password;
+    _username;
+    _password;
     //приватное свойство необходимо объявлять перед конструктором
-    //Статические методы объявляются перед конструктором
+    constructor ({username, password}) {
+        this._username = username;
+        this._password = password
+    }
     static authenticate_user() {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', 'https://examples.com/api/user/authenticate?username='+
-        this.username+'&password='+this.password, true )
-        //я привык писать шаблонной строкой 
-        //`https://examples.com/api/user/authenticate?username=${this.username}&password=${this.password}
-        //также я бы лучше сделал через
-        //const URL = 'https://examples.com/api/user/authenticate?' 
-        //fetch(`${URL}username=${this.username}&password=${this.password`).then(response => {
-    //if(response.ok){
-        //return response.json().then(...).catch(...)
-    
-        // но можно и так
+        UserService._username + '&password='+ UserService._password, true )
+        //я обычно пишу шаблонной строкой 
+        //`https://examples.com/api/user/authenticate?username=${UserService.username}&password=${UserService.password}
         xhr.responseType ='json';
         let result = false;
         xhr.onload = function() {
@@ -29,30 +24,37 @@ class UserService {
         };
         return result;
     }
-    constructor ({username, password}) {
-        this.username = username;
-        this.#password = password;
-    }
+
     get username() {
-        return this.username;
+        return this._username;
     }
     //для смены имени можно добавить сеттер
     set username(newUsername) {
-        this.username = newUsername;
+        this._username = newUsername;
       }
     get password() {
         throw "Hi and bye";
     }
+    //для смены пароля можно добавить сеттер
+    set password(newPassword) {
+        this._password = newPassword;
+      }
     
 }
-//метод клик, на сколько я понял, является устаревшим в jQuery
-$('form #login').click(function() {
-let username = $('#username');
-let password = $('password');
-let res= UserService(username, password).authenticate_user();
-if(response==true) {
+//метод click заменяю на .on('click', callback)
+$('form #login').on('click', function(e) {
+   e.preventDefault();
+let username = $('#username').val();
+let password = $('#password').val();
+//необходимо добавить new чтобы создать новый класс.
+const response = new UserService({username, password});
+//метод authenticate_user() является статическим и для того, чтобы обратиться к нему необходимо
+//вызвать его на самом классе
+const res = UserService.authenticate_user(response);
+if(res == true) {
     document.location.href = '/home';
 } else {
-    alert(response.error)
+    alert(res.error)
 }
+
 })
